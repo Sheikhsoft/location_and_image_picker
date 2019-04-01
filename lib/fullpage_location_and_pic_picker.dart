@@ -1,7 +1,10 @@
+library location_and_image_picker;
+
 import 'package:flutter/material.dart';
+import 'package:location_and_image_picker/location_and_image_picker.dart';
 import 'package:location_and_image_picker/utils.dart';
 
-import 'location_and_pic_picker.dart';
+
 
 class FullPageLocationAndImagePicker extends StatelessWidget {
   final Map mapData;
