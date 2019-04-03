@@ -2,12 +2,10 @@ library location_and_image_picker;
 
 import 'dart:async';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
-
 import 'map_box.dart';
 
 class LocationAndPicPicker extends StatefulWidget {
@@ -41,6 +39,7 @@ class _LocationAndPicPickerState extends State<LocationAndPicPicker> {
         ..forceAndroidLocationManager = true;
       position = await geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.bestForNavigation);
+
       _map['latitude'] = position.latitude.toString();
       _map['longitude'] = position.longitude.toString();
     } on PlatformException {
@@ -68,44 +67,61 @@ class _LocationAndPicPickerState extends State<LocationAndPicPicker> {
             (BuildContext context, AsyncSnapshot<GeolocationStatus> snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
+          } else {
+            switch (snapshot.data) {
+              case GeolocationStatus.disabled:
+                {
+                  return const PlaceholderWidget('Location services disabled',
+                      'Enable location services for this App using the device settings.');
+                }
+                break;
+              case GeolocationStatus.denied:
+                {
+                  return const PlaceholderWidget('Access to location denied',
+                      'Enable location services for this App using the device settings.');
+                }
+                break;
+              case GeolocationStatus.restricted:
+                {
+                  return const PlaceholderWidget(
+                      'Access to location restricted',
+                      'Enable location services for this App using the device settings.');
+                }
+                break;
+              case GeolocationStatus.unknown:
+                {
+                  return const PlaceholderWidget(
+                      'Access to location unknown restricted',
+                      'Enable location services for this App using the device settings.');
+                }
+                break;
+              case GeolocationStatus.granted:
+                {
+                  return MapBox(
+                    position: _position,
+                  );
+                }
+                break;
+            }
           }
-
-          if (snapshot.data == GeolocationStatus.disabled) {
-            return const MapBox();
-          }
-
-          if (snapshot.data == GeolocationStatus.denied) {
-            return const MapBox();
-          }
-
-          return _position != null
-              ? new MapBox(
-                  latitude: _position.latitude,
-                  longitude: _position.longitude,
-                )
-              : Container(
-                  child: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
         });
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     Widget _buildPicText() => new Container(
-          padding: EdgeInsets.only(left: 50.0, bottom: 30.0, top: 50.0),
-          child: Text(
-            "Picture of the incident (optional)",
-            style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
-          ),
-        );
+      padding: EdgeInsets.only(left: 50.0, bottom: 30.0, top: 50.0),
+      child: Text(
+        "Picture of the incident (optional)",
+        style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+      ),
+    );
 
     return new Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -216,5 +232,54 @@ class _LocationAndPicPickerState extends State<LocationAndPicPicker> {
     if (widget.onChanged != null) {
       widget.onChanged(map);
     }
+  }
+}
+
+class PlaceholderWidget extends StatelessWidget {
+  const PlaceholderWidget(this.title, this.message);
+
+  final String title;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: new BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey,
+            blurRadius: 10.0, // has the effect of softening the shadow
+            spreadRadius: 3.0, // has the effect of extending the shadow
+            offset: Offset(
+              5.0, // horizontal, move right 10
+              5.0, // vertical, move down 10
+            ),
+          )
+        ],
+        color: Colors.white,
+        border: new Border.all(width: 1.0, color: Colors.white),
+        borderRadius: const BorderRadius.all(const Radius.circular(20.0)),
+      ),
+      margin: EdgeInsets.symmetric(horizontal: 25.0),
+      width: double.infinity,
+      height: 150.0,
+      child: ClipRRect(
+        borderRadius: BorderRadius.all(const Radius.circular(20.0)),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Text(title,
+                  style: const TextStyle(fontSize: 20.0, color: Colors.black54),
+                  textAlign: TextAlign.center),
+              Text(message,
+                  style: const TextStyle(fontSize: 16.0, color: Colors.black54),
+                  textAlign: TextAlign.center),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
