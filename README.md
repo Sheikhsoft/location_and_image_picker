@@ -41,7 +41,7 @@ On Android you'll need to add either  the `ACCESS_FINE_LOCATION` permission to y
 ### Code for the location and image picker widget
 
 ``` dart
-import 'package:location_and_pic_picker/location_and_pic_picker.dart';';
+import 'package:location_and_pic_picker/location_and_pic_picker.dart';
 
 class MyHomePage extends StatefulWidget {
   @override
